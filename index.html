@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Health Monitoring Dashboard</title>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+body{
+font-family: Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+margin:0;
+}
+
+header{
+background:#1e293b;
+padding:20px;
+}
+
+h1{
+margin:5px;
+}
+
+h2{
+color:#38bdf8;
+margin-top:0;
+}
+
+.container{
+display:grid;
+grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+padding:30px;
+}
+
+.card{
+background:#1e293b;
+padding:25px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
+
+.value{
+font-size:35px;
+color:#22c55e;
+margin-top:10px;
+}
+
+.label{
+font-size:18px;
+color:#cbd5f5;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
+<h2>DEPARTMENT OF ELECTRICAL AND ELECTRONICS</h2>
+<h3>Health Monitoring Dashboard</h3>
+</header>
+
+<div class="container">
+
+<div class="card">
+<div class="label">ECG</div>
+<div id="ecg" class="value">--</div>
+</div>
+
+<div class="card">
+<div class="label">Pulse</div>
+<div id="pulse" class="value">--</div>
+</div>
+
+<div class="card">
+<div class="label">Oxygen</div>
+<div id="oxygen" class="value">--</div>
+</div>
+
+<div class="card">
+<div class="label">Heart Rate</div>
+<div id="hr" class="value">--</div>
+</div>
+
+<div class="card">
+<div class="label">Blood Pressure</div>
+<div id="bp" class="value">--</div>
+</div>
+
+</div>
+
+<script>
+
+var firebaseConfig = {
+databaseURL: "https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+var database = firebase.database();
+
+database.ref("/").on("value", function(snapshot){
+
+var data = snapshot.val();
+
+document.getElementById("ecg").innerHTML = data.ECG;
+document.getElementById("pulse").innerHTML = data.Pulse;
+document.getElementById("oxygen").innerHTML = data.Oxygen;
+document.getElementById("hr").innerHTML = data.HeartRate;
+document.getElementById("bp").innerHTML = data.BloodPressure;
+
+});
+
+</script>
+
+</body>
+</html>
