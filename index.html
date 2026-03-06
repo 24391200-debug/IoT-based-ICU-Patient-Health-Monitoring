@@ -1,14 +1,12 @@
 <!DOCTYPE html>
-
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <title>Health Monitoring Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -21,7 +19,7 @@ text-align:center;
 margin:0;
 }
 
-/* LOGIN PAGE */
+/* LOGIN */
 
 #loginPage{
 display:flex;
@@ -48,22 +46,9 @@ color:white;
 cursor:pointer;
 }
 
-button:hover{
-background:#16a34a;
-}
-
 header{
 background:#1e293b;
 padding:20px;
-}
-
-h1{
-margin:5px;
-}
-
-h2{
-color:#38bdf8;
-margin-top:0;
 }
 
 .container{
@@ -75,13 +60,13 @@ padding:30px;
 
 .card{
 background:#1e293b;
-padding:25px;
-border-radius:15px;
+padding:20px;
+border-radius:12px;
 box-shadow:0 5px 15px rgba(0,0,0,0.5);
 }
 
 .value{
-font-size:35px;
+font-size:32px;
 color:#22c55e;
 margin-top:10px;
 }
@@ -91,25 +76,24 @@ font-size:18px;
 color:#cbd5f5;
 }
 
-#ecgCard{
-grid-column:span 2;
-}
-
 .hidden{
 display:none;
 }
 
-.status{
-color:#f87171;
-margin-bottom:20px;
+/* LARGE ECG */
+
+#ecgCard{
+grid-column:span 4;
+height:320px;
 }
 
 canvas{
 background:#020617;
 border-radius:10px;
+height:260px !important;
 }
 
-/* Patient Details */
+/* PATIENT DETAILS */
 
 #patientDetails{
 background:#1e293b;
@@ -118,8 +102,12 @@ margin:20px;
 border-radius:10px;
 }
 
-</style>
+.status{
+color:#f87171;
+margin-bottom:20px;
+}
 
+</style>
 </head>
 
 <body>
@@ -155,10 +143,10 @@ border-radius:10px;
 
 <h3>Patient Details</h3>
 
-<p>Patient Name : John Doe</p>
-<p>Age : 60</p>
-<p>Gender : Male</p>
-<p>Patient ID : HM001</p>
+<p>Patient Name : <span id="pname">--</span></p>
+<p>Age : <span id="page">--</span></p>
+<p>Gender : <span id="pgender">--</span></p>
+<p>Patient ID : <span id="pid">--</span></p>
 
 </div>
 
@@ -168,38 +156,47 @@ Waiting for realtime data...
 
 <div class="container">
 
-<div class="card" id="ecgCard">
+<!-- ECG -->
+
+<div class="card hidden" id="ecgCard">
 <div class="label">ECG Graph</div>
 <canvas id="ecgChart"></canvas>
 </div>
 
-<div class="card" id="pulseCard">
+<!-- Pulse -->
+
+<div class="card hidden" id="pulseCard">
 <div class="label">Pulse</div>
 <div id="pulse" class="value">--</div>
 </div>
 
-<div class="card" id="oxygenCard">
+<!-- Oxygen -->
+
+<div class="card hidden" id="oxygenCard">
 <div class="label">Oxygen</div>
 <div id="oxygen" class="value">--</div>
 </div>
 
-<div class="card" id="hrCard">
+<!-- Heart Rate -->
+
+<div class="card hidden" id="hrCard">
 <div class="label">Heart Rate</div>
 <div id="hr" class="value">--</div>
 </div>
 
-<div class="card" id="bpCard">
+<!-- Blood Pressure -->
+
+<div class="card hidden" id="bpCard">
 <div class="label">Blood Pressure</div>
 <div id="bp" class="value">--</div>
 </div>
 
 </div>
-
 </div>
 
 <script>
 
-/* LOGIN SYSTEM */
+/* LOGIN */
 
 function login(){
 
@@ -214,7 +211,8 @@ if(
 document.getElementById("loginPage").style.display="none";
 document.getElementById("dashboard").style.display="block";
 
-}else{
+}
+else{
 
 document.getElementById("loginStatus").innerHTML="Invalid Login";
 
@@ -226,15 +224,19 @@ document.getElementById("loginStatus").innerHTML="Invalid Login";
 
 <script>
 
+/* FIREBASE CONFIG */
+
 var firebaseConfig = {
+
 databaseURL:"https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+
 };
 
 firebase.initializeApp(firebaseConfig);
 
 var database=firebase.database();
 
-let lastUpdate=Date.now();
+/* ECG GRAPH */
 
 let ecgData=[];
 
@@ -262,78 +264,95 @@ y:{display:false}
 }
 });
 
+/* ECG UPDATE */
+
 function updateECG(value){
 
 ecgData.push(value);
 
-if(ecgData.length>60){
+if(ecgData.length>80){
 ecgData.shift();
 }
 
 chart.data.labels.push("");
 
-if(chart.data.labels.length>60){
+if(chart.data.labels.length>80){
 chart.data.labels.shift();
 }
 
 chart.update();
+
 }
+
+/* FIREBASE DATA LISTENER */
 
 database.ref("/").on("value",function(snapshot){
 
 var data=snapshot.val();
 
-if(!data)return;
-
-lastUpdate=Date.now();
+if(!data) return;
 
 document.getElementById("status").innerHTML="Realtime Data Connected";
 
-document.getElementById("pulse").innerHTML=data.Pulse;
-document.getElementById("oxygen").innerHTML=data.Oxygen;
-document.getElementById("hr").innerHTML=data.HeartRate;
-document.getElementById("bp").innerHTML=data.BloodPressure;
+/* PATIENT DETAILS */
 
-updateECG(data.ECG);
+if(data.patient){
 
-showCards();
-
-});
-
-function hideCards(){
-
-document.getElementById("pulseCard").classList.add("hidden");
-document.getElementById("oxygenCard").classList.add("hidden");
-document.getElementById("hrCard").classList.add("hidden");
-document.getElementById("bpCard").classList.add("hidden");
-document.getElementById("ecgCard").classList.add("hidden");
-
-document.getElementById("status").innerHTML="No realtime data detected";
+document.getElementById("pname").innerHTML=data.patient.name;
+document.getElementById("page").innerHTML=data.patient.age;
+document.getElementById("pgender").innerHTML=data.patient.gender;
+document.getElementById("pid").innerHTML=data.patient.id;
 
 }
 
-function showCards(){
+/* PULSE */
 
+if(data.Pulse){
+
+document.getElementById("pulse").innerHTML=data.Pulse;
 document.getElementById("pulseCard").classList.remove("hidden");
+
+}
+
+/* OXYGEN */
+
+if(data.Oxygen){
+
+document.getElementById("oxygen").innerHTML=data.Oxygen;
 document.getElementById("oxygenCard").classList.remove("hidden");
+
+}
+
+/* HEART RATE */
+
+if(data.HeartRate){
+
+document.getElementById("hr").innerHTML=data.HeartRate;
 document.getElementById("hrCard").classList.remove("hidden");
+
+}
+
+/* BLOOD PRESSURE */
+
+if(data.BloodPressure){
+
+document.getElementById("bp").innerHTML=data.BloodPressure;
 document.getElementById("bpCard").classList.remove("hidden");
+
+}
+
+/* ECG */
+
+if(data.ECG){
+
+updateECG(data.ECG);
 document.getElementById("ecgCard").classList.remove("hidden");
 
 }
 
-setInterval(function(){
-
-if(Date.now()-lastUpdate>8000){
-hideCards();
-}
-
-},3000);
+});
 
 </script>
 
 </body>
 </html>
-
-
-
