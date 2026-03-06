@@ -1,19 +1,55 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Health Monitoring Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
+
 body{
-font-family: Arial;
+font-family:Arial;
 background:#0f172a;
 color:white;
 text-align:center;
 margin:0;
+}
+
+/* LOGIN PAGE */
+
+#loginPage{
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+input{
+padding:10px;
+margin:10px;
+border-radius:5px;
+border:none;
+width:220px;
+}
+
+button{
+padding:10px 20px;
+border:none;
+border-radius:5px;
+background:#22c55e;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#16a34a;
 }
 
 header{
@@ -32,7 +68,7 @@ margin-top:0;
 
 .container{
 display:grid;
-grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
 padding:30px;
 }
@@ -54,10 +90,58 @@ margin-top:10px;
 font-size:18px;
 color:#cbd5f5;
 }
+
+#ecgCard{
+grid-column:span 2;
+}
+
+.hidden{
+display:none;
+}
+
+.status{
+color:#f87171;
+margin-bottom:20px;
+}
+
+canvas{
+background:#020617;
+border-radius:10px;
+}
+
+/* Patient Details */
+
+#patientDetails{
+background:#1e293b;
+padding:15px;
+margin:20px;
+border-radius:10px;
+}
+
 </style>
+
 </head>
 
 <body>
+
+<!-- LOGIN PAGE -->
+
+<div id="loginPage">
+
+<h2>Health Monitoring System Login</h2>
+
+<input type="text" id="userid" placeholder="User ID">
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p id="loginStatus"></p>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" style="display:none">
 
 <header>
 <h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
@@ -65,56 +149,186 @@ color:#cbd5f5;
 <h3>Health Monitoring Dashboard</h3>
 </header>
 
-<div class="container">
+<!-- PATIENT DETAILS -->
 
-<div class="card">
-<div class="label">ECG</div>
-<div id="ecg" class="value">--</div>
+<div id="patientDetails">
+
+<h3>Patient Details</h3>
+
+<p>Patient Name : John Doe</p>
+<p>Age : 60</p>
+<p>Gender : Male</p>
+<p>Patient ID : HM001</p>
+
 </div>
 
-<div class="card">
+<div class="status" id="status">
+Waiting for realtime data...
+</div>
+
+<div class="container">
+
+<div class="card" id="ecgCard">
+<div class="label">ECG Graph</div>
+<canvas id="ecgChart"></canvas>
+</div>
+
+<div class="card" id="pulseCard">
 <div class="label">Pulse</div>
 <div id="pulse" class="value">--</div>
 </div>
 
-<div class="card">
+<div class="card" id="oxygenCard">
 <div class="label">Oxygen</div>
 <div id="oxygen" class="value">--</div>
 </div>
 
-<div class="card">
+<div class="card" id="hrCard">
 <div class="label">Heart Rate</div>
 <div id="hr" class="value">--</div>
 </div>
 
-<div class="card">
+<div class="card" id="bpCard">
 <div class="label">Blood Pressure</div>
 <div id="bp" class="value">--</div>
 </div>
 
 </div>
 
+</div>
+
+<script>
+
+/* LOGIN SYSTEM */
+
+function login(){
+
+let id=document.getElementById("userid").value;
+let pass=document.getElementById("password").value;
+
+if(
+(id==="24391200@sastra.ac.in" && pass==="24391200") ||
+(id==="24303663@sastra.ac.in" && pass==="24303663")
+){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("dashboard").style.display="block";
+
+}else{
+
+document.getElementById("loginStatus").innerHTML="Invalid Login";
+
+}
+
+}
+
+</script>
+
 <script>
 
 var firebaseConfig = {
-databaseURL: "https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+databaseURL:"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-var database = firebase.database();
+var database=firebase.database();
 
-database.ref("/").on("value", function(snapshot){
+let lastUpdate=Date.now();
 
-var data = snapshot.val();
+let ecgData=[];
 
-document.getElementById("ecg").innerHTML = data.ECG;
-document.getElementById("pulse").innerHTML = data.Pulse;
-document.getElementById("oxygen").innerHTML = data.Oxygen;
-document.getElementById("hr").innerHTML = data.HeartRate;
-document.getElementById("bp").innerHTML = data.BloodPressure;
+const ctx=document.getElementById("ecgChart").getContext("2d");
+
+const chart=new Chart(ctx,{
+type:"line",
+data:{
+labels:[],
+datasets:[{
+data:ecgData,
+borderColor:"#22c55e",
+borderWidth:2,
+pointRadius:0
+}]
+},
+options:{
+responsive:true,
+animation:false,
+plugins:{legend:{display:false}},
+scales:{
+x:{display:false},
+y:{display:false}
+}
+}
+});
+
+function updateECG(value){
+
+ecgData.push(value);
+
+if(ecgData.length>60){
+ecgData.shift();
+}
+
+chart.data.labels.push("");
+
+if(chart.data.labels.length>60){
+chart.data.labels.shift();
+}
+
+chart.update();
+}
+
+database.ref("/").on("value",function(snapshot){
+
+var data=snapshot.val();
+
+if(!data)return;
+
+lastUpdate=Date.now();
+
+document.getElementById("status").innerHTML="Realtime Data Connected";
+
+document.getElementById("pulse").innerHTML=data.Pulse;
+document.getElementById("oxygen").innerHTML=data.Oxygen;
+document.getElementById("hr").innerHTML=data.HeartRate;
+document.getElementById("bp").innerHTML=data.BloodPressure;
+
+updateECG(data.ECG);
+
+showCards();
 
 });
+
+function hideCards(){
+
+document.getElementById("pulseCard").classList.add("hidden");
+document.getElementById("oxygenCard").classList.add("hidden");
+document.getElementById("hrCard").classList.add("hidden");
+document.getElementById("bpCard").classList.add("hidden");
+document.getElementById("ecgCard").classList.add("hidden");
+
+document.getElementById("status").innerHTML="No realtime data detected";
+
+}
+
+function showCards(){
+
+document.getElementById("pulseCard").classList.remove("hidden");
+document.getElementById("oxygenCard").classList.remove("hidden");
+document.getElementById("hrCard").classList.remove("hidden");
+document.getElementById("bpCard").classList.remove("hidden");
+document.getElementById("ecgCard").classList.remove("hidden");
+
+}
+
+setInterval(function(){
+
+if(Date.now()-lastUpdate>8000){
+hideCards();
+}
+
+},3000);
 
 </script>
 
