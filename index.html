@@ -1,294 +1,336 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Health Monitoring Dashboard</title>
+<meta charset="UTF-8">
+<title>Health Monitoring Dashboard</title>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f172a;
-            color: white;
-            text-align: center;
-            margin: 0;
-        }
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        /* LOGO STYLING */
-        .logo {
-            width: 100px; /* Adjust size as needed */
-            height: auto;
-            margin-bottom: 15px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        /* LOGIN PAGE */
-        #loginPage {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+<style>
 
-        input {
-            padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
-            border: none;
-            width: 220px;
-        }
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+text-align:center;
+margin:0;
+}
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background: #22c55e;
-            color: white;
-            cursor: pointer;
-        }
+/* LOGIN PAGE */
 
-        button:hover {
-            background: #16a34a;
-        }
+#loginPage{
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
 
-        header {
-            background: #1e293b;
-            padding: 20px;
-        }
+input{
+padding:10px;
+margin:10px;
+border-radius:5px;
+border:none;
+width:220px;
+}
 
-        h1 {
-            margin: 5px;
-            font-size: 24px;
-        }
+button{
+padding:10px 20px;
+border:none;
+border-radius:5px;
+background:#22c55e;
+color:white;
+cursor:pointer;
+}
 
-        h2 {
-            color: #38bdf8;
-            margin-top: 0;
-            font-size: 18px;
-        }
+button:hover{
+background:#16a34a;
+}
 
-        h3 {
-            margin: 10px 0;
-        }
+header{
+background:#1e293b;
+padding:20px;
+}
 
-        .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            padding: 30px;
-        }
+h1{
+margin:5px;
+}
 
-        .card {
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        }
+h2{
+color:#38bdf8;
+margin-top:0;
+}
 
-        .value {
-            font-size: 35px;
-            color: #22c55e;
-            margin-top: 10px;
-        }
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px;
+}
 
-        .label {
-            font-size: 18px;
-            color: #cbd5f5;
-        }
+.card{
+background:#1e293b;
+padding:25px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.5);
+}
 
-        #ecgCard {
-            grid-column: span 2;
-        }
+.value{
+font-size:35px;
+color:#22c55e;
+margin-top:10px;
+}
 
-        .hidden {
-            display: none;
-        }
+.label{
+font-size:18px;
+color:#cbd5f5;
+}
 
-        .status {
-            color: #f87171;
-            margin-bottom: 20px;
-        }
+#ecgCard{
+grid-column:span 2;
+}
 
-        canvas {
-            background: #020617;
-            border-radius: 10px;
-        }
+.hidden{
+display:none;
+}
 
-        /* Patient Details */
-        #patientDetails {
-            background: #1e293b;
-            padding: 15px;
-            margin: 20px;
-            border-radius: 10px;
-        }
-    </style>
+.status{
+color:#f87171;
+margin-bottom:20px;
+}
+
+canvas{
+background:#020617;
+border-radius:10px;
+}
+
+/* Patient Details */
+
+#patientDetails{
+background:#1e293b;
+padding:15px;
+margin:20px;
+border-radius:10px;
+}
+
+</style>
+
 </head>
 
 <body>
 
-    <div id="loginPage">
-        <h2>Health Monitoring System Login</h2>
-        <input type="text" id="userid" placeholder="User ID">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <p id="loginStatus"></p>
-    </div>
+<!-- LOGIN PAGE -->
 
-    <div id="dashboard" style="display:none">
-        <header>
-            <img src="logo.png" alt="College Logo" class="logo">
-            <h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
-            <h2>DEPARTMENT OF ELECTRICAL AND ELECTRONICS</h2>
-            <h3>Health Monitoring Dashboard</h3>
-        </header>
+<div id="loginPage">
 
-        <div id="patientDetails">
-            <h3>Patient Details</h3>
-            <p>Patient Name : John Doe</p>
-            <p>Age : 60</p>
-            <p>Gender : Male</p>
-            <p>Patient ID : HM001</p>
-        </div>
+<h2>Health Monitoring System Login</h2>
 
-        <div class="status" id="status">
-            Waiting for realtime data...
-        </div>
+<input type="text" id="userid" placeholder="User ID">
+<input type="password" id="password" placeholder="Password">
 
-        <div class="container">
-            <div class="card" id="ecgCard">
-                <div class="label">ECG Graph</div>
-                <canvas id="ecgChart"></canvas>
-            </div>
+<button onclick="login()">Login</button>
 
-            <div class="card" id="pulseCard">
-                <div class="label">Pulse</div>
-                <div id="pulse" class="value">--</div>
-            </div>
+<p id="loginStatus"></p>
 
-            <div class="card" id="oxygenCard">
-                <div class="label">Oxygen</div>
-                <div id="oxygen" class="value">--</div>
-            </div>
+</div>
 
-            <div class="card" id="hrCard">
-                <div class="label">Heart Rate</div>
-                <div id="hr" class="value">--</div>
-            </div>
+<!-- DASHBOARD -->
 
-            <div class="card" id="bpCard">
-                <div class="label">Blood Pressure</div>
-                <div id="bp" class="value">--</div>
-            </div>
-        </div>
-    </div>
+<div id="dashboard" style="display:none">
 
-    <script>
-        /* LOGIN SYSTEM */
-        function login() {
-            let id = document.getElementById("userid").value;
-            let pass = document.getElementById("password").value;
+<header>
+<h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
+<h2>DEPARTMENT OF ELECTRICAL AND ELECTRONICS</h2>
+<h3>Health Monitoring Dashboard</h3>
+</header>
 
-            if (
-                (id === "24391200@sastra.ac.in" && pass === "24391200") ||
-                (id === "24303663@sastra.ac.in" && pass === "24303663")
-            ) {
-                document.getElementById("loginPage").style.display = "none";
-                document.getElementById("dashboard").style.display = "block";
-            } else {
-                document.getElementById("loginStatus").innerHTML = "Invalid Login";
-            }
-        }
+<!-- PATIENT DETAILS -->
 
-        /* FIREBASE & CHART LOGIC */
-        var firebaseConfig = {
-            databaseURL: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/"
-        };
+<div id="patientDetails">
 
-        firebase.initializeApp(firebaseConfig);
-        var database = firebase.database();
+<h3>Patient Details</h3>
 
-        let lastUpdate = Date.now();
-        let ecgData = [];
-        const ctx = document.getElementById("ecgChart").getContext("2d");
+<p>Patient Name : John Doe</p>
+<p>Age : 60</p>
+<p>Gender : Male</p>
+<p>Patient ID : HM001</p>
 
-        const chart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: [],
-                datasets: [{
-                    data: ecgData,
-                    borderColor: "#22c55e",
-                    borderWidth: 2,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                animation: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { display: false },
-                    y: { display: false }
-                }
-            }
-        });
+</div>
 
-        function updateECG(value) {
-            ecgData.push(value);
-            if (ecgData.length > 60) {
-                ecgData.shift();
-            }
-            chart.data.labels.push("");
-            if (chart.data.labels.length > 60) {
-                chart.data.labels.shift();
-            }
-            chart.update();
-        }
+<div class="status" id="status">
+Waiting for realtime data...
+</div>
 
-        database.ref("/").on("value", function(snapshot) {
-            var data = snapshot.val();
-            if (!data) return;
+<div class="container">
 
-            lastUpdate = Date.now();
-            document.getElementById("status").innerHTML = "Realtime Data Connected";
-            document.getElementById("pulse").innerHTML = data.Pulse;
-            document.getElementById("oxygen").innerHTML = data.Oxygen;
-            document.getElementById("hr").innerHTML = data.HeartRate;
-            document.getElementById("bp").innerHTML = data.BloodPressure;
+<div class="card" id="ecgCard">
+<div class="label">ECG Graph</div>
+<canvas id="ecgChart"></canvas>
+</div>
 
-            updateECG(data.ECG);
-            showCards();
-        });
+<div class="card" id="pulseCard">
+<div class="label">Pulse</div>
+<div id="pulse" class="value">--</div>
+</div>
 
-        function hideCards() {
-            document.getElementById("pulseCard").classList.add("hidden");
-            document.getElementById("oxygenCard").classList.add("hidden");
-            document.getElementById("hrCard").classList.add("hidden");
-            document.getElementById("bpCard").classList.add("hidden");
-            document.getElementById("ecgCard").classList.add("hidden");
-            document.getElementById("status").innerHTML = "No realtime data detected";
-        }
+<div class="card" id="oxygenCard">
+<div class="label">Oxygen</div>
+<div id="oxygen" class="value">--</div>
+</div>
 
-        function showCards() {
-            document.getElementById("pulseCard").classList.remove("hidden");
-            document.getElementById("oxygenCard").classList.remove("hidden");
-            document.getElementById("hrCard").classList.remove("hidden");
-            document.getElementById("bpCard").classList.remove("hidden");
-            document.getElementById("ecgCard").classList.remove("hidden");
-        }
+<div class="card" id="hrCard">
+<div class="label">Heart Rate</div>
+<div id="hr" class="value">--</div>
+</div>
 
-        setInterval(function() {
-            if (Date.now() - lastUpdate > 8000) {
-                hideCards();
-            }
-        }, 3000);
-    </script>
+<div class="card" id="bpCard">
+<div class="label">Blood Pressure</div>
+<div id="bp" class="value">--</div>
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* LOGIN SYSTEM */
+
+function login(){
+
+let id=document.getElementById("userid").value;
+let pass=document.getElementById("password").value;
+
+if(
+(id==="24391200@sastra.ac.in" && pass==="24391200") ||
+(id==="24303663@sastra.ac.in" && pass==="24303663")
+){
+
+document.getElementById("loginPage").style.display="none";
+document.getElementById("dashboard").style.display="block";
+
+}else{
+
+document.getElementById("loginStatus").innerHTML="Invalid Login";
+
+}
+
+}
+
+</script>
+
+<script>
+
+var firebaseConfig = {
+databaseURL:"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+var database=firebase.database();
+
+let lastUpdate=Date.now();
+
+let ecgData=[];
+
+const ctx=document.getElementById("ecgChart").getContext("2d");
+
+const chart=new Chart(ctx,{
+type:"line",
+data:{
+labels:[],
+datasets:[{
+data:ecgData,
+borderColor:"#22c55e",
+borderWidth:2,
+pointRadius:0
+}]
+},
+options:{
+responsive:true,
+animation:false,
+plugins:{legend:{display:false}},
+scales:{
+x:{display:false},
+y:{display:false}
+}
+}
+});
+
+function updateECG(value){
+
+ecgData.push(value);
+
+if(ecgData.length>60){
+ecgData.shift();
+}
+
+chart.data.labels.push("");
+
+if(chart.data.labels.length>60){
+chart.data.labels.shift();
+}
+
+chart.update();
+}
+
+database.ref("/").on("value",function(snapshot){
+
+var data=snapshot.val();
+
+if(!data)return;
+
+lastUpdate=Date.now();
+
+document.getElementById("status").innerHTML="Realtime Data Connected";
+
+document.getElementById("pulse").innerHTML=data.Pulse;
+document.getElementById("oxygen").innerHTML=data.Oxygen;
+document.getElementById("hr").innerHTML=data.HeartRate;
+document.getElementById("bp").innerHTML=data.BloodPressure;
+
+updateECG(data.ECG);
+
+showCards();
+
+});
+
+function hideCards(){
+
+document.getElementById("pulseCard").classList.add("hidden");
+document.getElementById("oxygenCard").classList.add("hidden");
+document.getElementById("hrCard").classList.add("hidden");
+document.getElementById("bpCard").classList.add("hidden");
+document.getElementById("ecgCard").classList.add("hidden");
+
+document.getElementById("status").innerHTML="No realtime data detected";
+
+}
+
+function showCards(){
+
+document.getElementById("pulseCard").classList.remove("hidden");
+document.getElementById("oxygenCard").classList.remove("hidden");
+document.getElementById("hrCard").classList.remove("hidden");
+document.getElementById("bpCard").classList.remove("hidden");
+document.getElementById("ecgCard").classList.remove("hidden");
+
+}
+
+setInterval(function(){
+
+if(Date.now()-lastUpdate>8000){
+hideCards();
+}
+
+},3000);
+
+</script>
 
 </body>
 </html>
