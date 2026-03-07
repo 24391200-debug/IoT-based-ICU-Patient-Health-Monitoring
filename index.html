@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +6,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
@@ -16,188 +14,219 @@ font-family:Arial;
 background:#0f172a;
 color:white;
 text-align:center;
-margin:0;
 }
 
-header{
-background:#1e293b;
-padding:20px;
+/* Headings */
+
+.college{
+font-size:26px;
+font-weight:bold;
+margin-top:20px;
 }
 
-h1{
-margin:5px;
+.department{
+font-size:20px;
+margin-top:5px;
 }
 
-h2{
-color:#38bdf8;
-margin-top:0;
-}
-
-.container{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-padding:30px;
-}
-
-.card{
-background:#1e293b;
-padding:25px;
-border-radius:15px;
-box-shadow:0 5px 15px rgba(0,0,0,0.5);
-}
-
-.value{
-font-size:35px;
-color:#22c55e;
+.dashboard{
+font-size:28px;
 margin-top:10px;
-}
-
-.label{
-font-size:18px;
-color:#cbd5f5;
-}
-
-#ecgCard{
-grid-column:span 2;
-}
-
-.hidden{
-display:none;
-}
-
-.status{
-color:#f87171;
 margin-bottom:20px;
 }
 
-canvas{
-background:#020617;
+/* Login Box */
+
+.loginBox{
+width:300px;
+margin:auto;
+margin-top:120px;
+background:#1e293b;
+padding:25px;
 border-radius:10px;
 }
 
-/* LOGIN PAGE */
-
-#loginPage{
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.loginBox{
-background:#1e293b;
-padding:40px;
-border-radius:15px;
-box-shadow:0 5px 20px rgba(0,0,0,0.6);
-}
-
 input{
+width:90%;
 padding:10px;
 margin:10px;
-width:250px;
-border:none;
 border-radius:5px;
+border:none;
 }
 
 button{
 padding:10px 20px;
-background:#38bdf8;
 border:none;
-color:black;
-cursor:pointer;
+background:#22c55e;
+color:white;
+font-size:16px;
 border-radius:5px;
+cursor:pointer;
+}
+
+/* Dashboard Grid */
+
+.container{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+width:900px;
+margin:auto;
+margin-top:40px;
+}
+
+/* Cards */
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+font-size:20px;
+}
+
+.value{
+font-size:30px;
+margin-top:10px;
+}
+
+.patientText{
+font-size:16px;
+text-align:left;
+margin-top:10px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <!-- LOGIN PAGE -->
 
-<div id="loginPage">
-
-<div class="loginBox">
+<div id="loginPage" class="loginBox">
 
 <h2>Admin Login</h2>
 
-<input type="text" id="adminId" placeholder="Admin ID"><br>
+<input type="text" id="adminId" placeholder="Admin ID">
 
-<input type="password" id="password" placeholder="Password"><br>
+<input type="password" id="password" placeholder="Password">
+
+<br>
 
 <button onclick="login()">Login</button>
 
-<p id="loginError"></p>
+<p id="error" style="color:red;"></p>
 
 </div>
 
-</div>
 
+<!-- DASHBOARD PAGE -->
 
-<!-- DASHBOARD -->
+<div id="dashboardPage" style="display:none;">
 
-<div id="dashboard" class="hidden">
+<div class="college">SHANMUGHA POLYTECHNIC COLLEGE</div>
 
-<header>
-<h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
-<h2>DEPARTMENT OF ELECTRICAL AND ELECTRONICS</h2>
-<h3>Health Monitoring Dashboard</h3>
-</header>
+<div class="department">DEPARTMENT OF ELECTRICAL AND ELECTRONICS</div>
 
-<div class="status" id="status">
-Waiting for realtime data...
-</div>
+<div class="dashboard">Health Monitoring Dashboard</div>
+
 
 <div class="container">
 
-<div class="card" id="ecgCard">
-<div class="label">ECG Graph</div>
-<canvas id="ecgChart"></canvas>
-</div>
+<!-- PATIENT DETAILS -->
 
-<div class="card" id="pulseCard">
-<div class="label">Pulse</div>
-<div id="pulse" class="value">--</div>
-</div>
+<div class="card">
 
-<div class="card" id="oxygenCard">
-<div class="label">Oxygen</div>
-<div id="oxygen" class="value">--</div>
-</div>
+Patient Details
 
-<div class="card" id="hrCard">
-<div class="label">Heart Rate</div>
-<div id="hr" class="value">--</div>
-</div>
+<div class="patientText">
 
-<div class="card" id="bpCard">
-<div class="label">Blood Pressure</div>
-<div id="bp" class="value">--</div>
-</div>
+Name : <span id="pname">-</span><br><br>
+
+Age : <span id="age">-</span><br><br>
+
+Patient ID : <span id="pid">-</span><br><br>
+
+Sex : <span id="sex">-</span>
 
 </div>
 
 </div>
+
+
+<!-- PULSE -->
+
+<div class="card">
+Pulse
+<div class="value" id="pulse">-</div>
+</div>
+
+
+<!-- SPO2 -->
+
+<div class="card">
+SpO2
+<div class="value" id="spo2">-</div>
+</div>
+
+
+<!-- TEMPERATURE -->
+
+<div class="card">
+Temperature
+<div class="value" id="temp">-</div>
+</div>
+
+
+<!-- BLOOD PRESSURE -->
+
+<div class="card">
+Blood Pressure
+<div class="value" id="bp">-</div>
+</div>
+
+
+<!-- RESPIRATION -->
+
+<div class="card">
+Respiration
+<div class="value" id="resp">-</div>
+</div>
+
+
+<!-- ECG -->
+
+<div class="card">
+ECG
+<div class="value" id="ecg">-</div>
+</div>
+
+</div>
+
+</div>
+
+
 
 <script>
 
-/* LOGIN SYSTEM */
+/* ADMIN LOGIN */
 
 function login(){
 
 let id=document.getElementById("adminId").value;
 let pass=document.getElementById("password").value;
 
-if(id==="24391200@sastra.ac.in" && pass==="24391200")
-{
+if(
+(id=="24391200@sastra.ac.in" && pass=="24391200") ||
+(id=="24303663@sastra.ac.in" && pass=="24303663")
+){
+
 document.getElementById("loginPage").style.display="none";
-document.getElementById("dashboard").classList.remove("hidden");
-}
-else
-{
-document.getElementById("loginError").innerHTML="Invalid Admin Login";
+document.getElementById("dashboardPage").style.display="block";
+
+}else{
+
+document.getElementById("error").innerText="Invalid Admin ID or Password";
+
 }
 
 }
@@ -205,121 +234,51 @@ document.getElementById("loginError").innerHTML="Invalid Admin Login";
 
 /* FIREBASE CONFIG */
 
-var firebaseConfig = {
-databaseURL:"https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
+const firebaseConfig = {
+
+apiKey:"AIzaSyAkMIvf6mCqAomv5bvaguJp7gCiwCxK76g",
+
+authDomain:"heath-care-monitoring.firebaseapp.com",
+
+databaseURL:"https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+projectId:"heath-care-monitoring"
+
 };
 
 firebase.initializeApp(firebaseConfig);
 
-var database=firebase.database();
 
-/* ECG GRAPH */
+/* DATABASE REFERENCE */
 
-let lastUpdate=Date.now();
-let ecgData=[];
-
-const ctx=document.getElementById("ecgChart").getContext("2d");
-
-const chart=new Chart(ctx,{
-type:"line",
-data:{
-labels:[],
-datasets:[{
-data:ecgData,
-borderColor:"#22c55e",
-borderWidth:2,
-pointRadius:0
-}]
-},
-options:{
-responsive:true,
-animation:false,
-plugins:{legend:{display:false}},
-scales:{
-x:{display:false},
-y:{display:false}
-}
-}
-});
+var db = firebase.database().ref("healthData");
 
 
-function updateECG(value){
+db.on("value",function(snapshot){
 
-ecgData.push(value);
-
-if(ecgData.length>60){
-ecgData.shift();
-}
-
-chart.data.labels.push("");
-
-if(chart.data.labels.length>60){
-chart.data.labels.shift();
-}
-
-chart.update();
-
-}
+let data=snapshot.val() || {};
 
 
-/* READ REALTIME DATA FROM ICU_PATIENT */
+/* HEALTH PARAMETERS */
 
-database.ref("ICU_PATIENT").on("value",function(snapshot){
+document.getElementById("pulse").innerText = data.pulse ?? "-";
+document.getElementById("spo2").innerText = data.spo2 ?? "-";
+document.getElementById("temp").innerText = data.temperature ?? "-";
+document.getElementById("bp").innerText = data.bp ?? "-";
+document.getElementById("resp").innerText = data.resp ?? "-";
+document.getElementById("ecg").innerText = data.ecg ?? "-";
 
-var data=snapshot.val();
 
-if(!data)return;
+/* PATIENT DETAILS */
 
-lastUpdate=Date.now();
-
-document.getElementById("status").innerHTML="Realtime Data Connected";
-
-document.getElementById("pulse").innerHTML=data.pulse;
-document.getElementById("oxygen").innerHTML=data.spo2;
-document.getElementById("hr").innerHTML=data.pulse;
-document.getElementById("bp").innerHTML=data.systolic+" / "+data.diastolic;
-
-updateECG(data.ecg);
-
-showCards();
+document.getElementById("pname").innerText = data.patient_name ?? "-";
+document.getElementById("age").innerText = data.age ?? "-";
+document.getElementById("pid").innerText = data.patient_id ?? "-";
+document.getElementById("sex").innerText = data.sex ?? "-";
 
 });
-
-
-function hideCards(){
-
-document.getElementById("pulseCard").classList.add("hidden");
-document.getElementById("oxygenCard").classList.add("hidden");
-document.getElementById("hrCard").classList.add("hidden");
-document.getElementById("bpCard").classList.add("hidden");
-document.getElementById("ecgCard").classList.add("hidden");
-
-document.getElementById("status").innerHTML="No realtime data detected";
-
-}
-
-
-function showCards(){
-
-document.getElementById("pulseCard").classList.remove("hidden");
-document.getElementById("oxygenCard").classList.remove("hidden");
-document.getElementById("hrCard").classList.remove("hidden");
-document.getElementById("bpCard").classList.remove("hidden");
-document.getElementById("ecgCard").classList.remove("hidden");
-
-}
-
-
-setInterval(function(){
-
-if(Date.now()-lastUpdate>8000){
-hideCards();
-}
-
-},3000);
 
 </script>
 
 </body>
 </html>
-```
