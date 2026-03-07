@@ -1,8 +1,9 @@
 ```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>ICU Health Monitoring</title>
+<meta charset="UTF-8">
+<title>Health Monitoring Dashboard</title>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -11,79 +12,101 @@
 <style>
 
 body{
-font-family: Arial;
-background:#f2f6fc;
+font-family:Arial;
+background:#0f172a;
+color:white;
 text-align:center;
 margin:0;
 }
 
-.header{
-background:#002b5c;
-color:white;
+header{
+background:#1e293b;
 padding:20px;
 }
 
-.header h1{
-margin:0;
-font-size:28px;
+h1{
+margin:5px;
 }
 
-.header h2{
-margin:5px;
-font-size:20px;
+h2{
+color:#38bdf8;
+margin-top:0;
 }
 
 .container{
-padding:20px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:30px;
 }
 
 .card{
-display:inline-block;
-background:white;
-padding:20px;
-margin:10px;
-border-radius:10px;
-width:200px;
-box-shadow:0px 0px 10px gray;
+background:#1e293b;
+padding:25px;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.5);
 }
 
 .value{
-font-size:32px;
-color:#0a6;
-font-weight:bold;
+font-size:35px;
+color:#22c55e;
+margin-top:10px;
 }
 
-#chartBox{
-width:90%;
-margin:auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0px 0px 10px gray;
+.label{
+font-size:18px;
+color:#cbd5f5;
 }
 
-.login{
-width:350px;
-margin:auto;
-margin-top:150px;
-background:white;
-padding:30px;
+#ecgCard{
+grid-column:span 2;
+}
+
+.hidden{
+display:none;
+}
+
+.status{
+color:#f87171;
+margin-bottom:20px;
+}
+
+canvas{
+background:#020617;
 border-radius:10px;
-box-shadow:0px 0px 10px gray;
+}
+
+/* LOGIN PAGE */
+
+#loginPage{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.loginBox{
+background:#1e293b;
+padding:40px;
+border-radius:15px;
+box-shadow:0 5px 20px rgba(0,0,0,0.6);
 }
 
 input{
-width:90%;
 padding:10px;
 margin:10px;
+width:250px;
+border:none;
+border-radius:5px;
 }
 
 button{
 padding:10px 20px;
-background:#002b5c;
-color:white;
+background:#38bdf8;
 border:none;
+color:black;
 cursor:pointer;
+border-radius:5px;
 }
 
 </style>
@@ -92,66 +115,67 @@ cursor:pointer;
 
 <body>
 
-<div id="loginPage" class="login">
+<!-- LOGIN PAGE -->
+
+<div id="loginPage">
+
+<div class="loginBox">
 
 <h2>Admin Login</h2>
 
-<input type="text" id="adminId" placeholder="Admin ID">
+<input type="text" id="adminId" placeholder="Admin ID"><br>
 
-<input type="password" id="password" placeholder="Password">
-
-<br>
+<input type="password" id="password" placeholder="Password"><br>
 
 <button onclick="login()">Login</button>
 
-<p id="loginError" style="color:red"></p>
+<p id="loginError"></p>
 
 </div>
 
-<div id="dashboard" style="display:none">
+</div>
 
-<div class="header">
 
+<!-- DASHBOARD -->
+
+<div id="dashboard" class="hidden">
+
+<header>
 <h1>SHANMUGHA POLYTECHNIC COLLEGE</h1>
-
 <h2>DEPARTMENT OF ELECTRICAL AND ELECTRONICS</h2>
+<h3>Health Monitoring Dashboard</h3>
+</header>
 
+<div class="status" id="status">
+Waiting for realtime data...
 </div>
 
 <div class="container">
 
-<div class="card">
-<h3>Pulse</h3>
-<div class="value" id="pulse">--</div>
-</div>
-
-<div class="card">
-<h3>SpO2</h3>
-<div class="value" id="spo2">--</div>
-</div>
-
-<div class="card">
-<h3>Temperature</h3>
-<div class="value" id="temp">--</div>
-</div>
-
-<div class="card">
-<h3>Systolic</h3>
-<div class="value" id="sys">--</div>
-</div>
-
-<div class="card">
-<h3>Diastolic</h3>
-<div class="value" id="dia">--</div>
-</div>
-
-</div>
-
-<div id="chartBox">
-
-<h2>ECG Real-Time Graph</h2>
-
+<div class="card" id="ecgCard">
+<div class="label">ECG Graph</div>
 <canvas id="ecgChart"></canvas>
+</div>
+
+<div class="card" id="pulseCard">
+<div class="label">Pulse</div>
+<div id="pulse" class="value">--</div>
+</div>
+
+<div class="card" id="oxygenCard">
+<div class="label">Oxygen</div>
+<div id="oxygen" class="value">--</div>
+</div>
+
+<div class="card" id="hrCard">
+<div class="label">Heart Rate</div>
+<div id="hr" class="value">--</div>
+</div>
+
+<div class="card" id="bpCard">
+<div class="label">Blood Pressure</div>
+<div id="bp" class="value">--</div>
+</div>
 
 </div>
 
@@ -159,92 +183,140 @@ cursor:pointer;
 
 <script>
 
-/* ADMIN LOGIN */
+/* LOGIN SYSTEM */
 
 function login(){
 
-let id=document.getElementById("adminId").value
-let pass=document.getElementById("password").value
+let id=document.getElementById("adminId").value;
+let pass=document.getElementById("password").value;
 
 if(id==="24391200@sastra.ac.in" && pass==="24391200")
 {
-document.getElementById("loginPage").style.display="none"
-document.getElementById("dashboard").style.display="block"
+document.getElementById("loginPage").style.display="none";
+document.getElementById("dashboard").classList.remove("hidden");
 }
 else
 {
-document.getElementById("loginError").innerHTML="Invalid Login"
+document.getElementById("loginError").innerHTML="Invalid Admin Login";
 }
 
 }
+
 
 /* FIREBASE CONFIG */
 
-const firebaseConfig = {
-apiKey: "AIzaSyAkMIvf6mCqAomv5bvaguJp7gCiwCxK76g",
-authDomain: "heath-care-monitoring.firebaseapp.com",
-databaseURL: "https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "heath-care-monitoring",
-storageBucket: "heath-care-monitoring.firebasestorage.app",
-messagingSenderId: "740485752935",
-appId: "1:740485752935:web:838793c0e01bbb78cc0cc2"
+var firebaseConfig = {
+databaseURL:"https://heath-care-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const db = firebase.database().ref("ICU_PATIENT");
+var database=firebase.database();
 
-/* ECG CHART */
+/* ECG GRAPH */
 
-var ctx=document.getElementById("ecgChart").getContext("2d");
+let lastUpdate=Date.now();
+let ecgData=[];
 
-var ecgChart=new Chart(ctx,{
+const ctx=document.getElementById("ecgChart").getContext("2d");
+
+const chart=new Chart(ctx,{
 type:"line",
 data:{
 labels:[],
 datasets:[{
-label:"ECG Signal",
-data:[],
-borderColor:"red",
-fill:false
+data:ecgData,
+borderColor:"#22c55e",
+borderWidth:2,
+pointRadius:0
 }]
 },
 options:{
+responsive:true,
 animation:false,
+plugins:{legend:{display:false}},
 scales:{
-y:{
-beginAtZero:true
-}
+x:{display:false},
+y:{display:false}
 }
 }
 });
 
-/* REALTIME DATA */
 
-db.on("value",function(snapshot){
+function updateECG(value){
 
-let data=snapshot.val();
+ecgData.push(value);
 
-document.getElementById("pulse").innerHTML=data.pulse
-document.getElementById("spo2").innerHTML=data.spo2
-document.getElementById("temp").innerHTML=data.temperature
-document.getElementById("sys").innerHTML=data.systolic
-document.getElementById("dia").innerHTML=data.diastolic
-
-let ecg=data.ecg
-
-ecgChart.data.labels.push("")
-ecgChart.data.datasets[0].data.push(ecg)
-
-if(ecgChart.data.labels.length>30)
-{
-ecgChart.data.labels.shift()
-ecgChart.data.datasets[0].data.shift()
+if(ecgData.length>60){
+ecgData.shift();
 }
 
-ecgChart.update()
+chart.data.labels.push("");
 
-})
+if(chart.data.labels.length>60){
+chart.data.labels.shift();
+}
+
+chart.update();
+
+}
+
+
+/* READ REALTIME DATA FROM ICU_PATIENT */
+
+database.ref("ICU_PATIENT").on("value",function(snapshot){
+
+var data=snapshot.val();
+
+if(!data)return;
+
+lastUpdate=Date.now();
+
+document.getElementById("status").innerHTML="Realtime Data Connected";
+
+document.getElementById("pulse").innerHTML=data.pulse;
+document.getElementById("oxygen").innerHTML=data.spo2;
+document.getElementById("hr").innerHTML=data.pulse;
+document.getElementById("bp").innerHTML=data.systolic+" / "+data.diastolic;
+
+updateECG(data.ecg);
+
+showCards();
+
+});
+
+
+function hideCards(){
+
+document.getElementById("pulseCard").classList.add("hidden");
+document.getElementById("oxygenCard").classList.add("hidden");
+document.getElementById("hrCard").classList.add("hidden");
+document.getElementById("bpCard").classList.add("hidden");
+document.getElementById("ecgCard").classList.add("hidden");
+
+document.getElementById("status").innerHTML="No realtime data detected";
+
+}
+
+
+function showCards(){
+
+document.getElementById("pulseCard").classList.remove("hidden");
+document.getElementById("oxygenCard").classList.remove("hidden");
+document.getElementById("hrCard").classList.remove("hidden");
+document.getElementById("bpCard").classList.remove("hidden");
+document.getElementById("ecgCard").classList.remove("hidden");
+
+}
+
+
+setInterval(function(){
+
+if(Date.now()-lastUpdate>8000){
+hideCards();
+}
+
+},3000);
 
 </script>
 
